@@ -25,3 +25,5 @@ await Promise.all(urls.map(async url => {
 }));
 
 fs.writeFileSync('dist/index.html', content);
+
+fs.copyFileSync('favicon.svg', 'dist/favicon.svg');
