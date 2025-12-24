@@ -19,7 +19,7 @@ jobs:
         with:
           cache: 'npm'
           registry-url: https://registry.npmjs.org
-          node-version: >=24.0.0
+          node-version: lts/*
 
       - name: Build
         run: npm run build
