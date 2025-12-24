@@ -20,3 +20,8 @@ It may be expended on in the future if I regain interest in OCR or character spa
 
 Currently, it relies on the document still containing the original text data behind the overlays, 
 typically seen when somebody highlights text (in yellow OR black) in a PDF or adds annotations.
+
+## Contributions
+If you have a method you like to employ when extracting document text,
+feel free to raise a ticket (or better yet, a pull request) and I'll be happy to take a look.
+The more options we can offer, the merrier.
