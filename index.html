@@ -20,6 +20,9 @@
         #output p {
             margin: 0;
         }
+        a {
+            color: #4ea1f3;
+        }
     </style>
 </head>
 
@@ -29,6 +32,7 @@
     <br />
     <br />
     <button type="button" id="downloadButton" disabled>Download as Text</button>
+    <p id="status"></p>
     <hr />
     <div
         id="output"
@@ -42,8 +46,10 @@
     import { PDFParse } from 'https://cdn.jsdelivr.net/npm/pdf-parse@2.4.5/dist/pdf-parse/web/pdf-parse.es.js';
     const input = document.getElementById('fileInput');
     const output = document.getElementById('output');
+    const status = document.getElementById('status');
     const downloadButton = document.getElementById('downloadButton');
     let files = [];
+    let failures = 0;
 
     PDFParse.setWorker('https://cdn.jsdelivr.net/npm/pdf-parse@2.4.5/dist/pdf-parse/web/pdf.worker.min.mjs');
 
@@ -68,13 +74,17 @@
     async function* getFilesText() {
         let idx=0;
         for (const file of files) {
-            log(`[${++idx}/${files.length}] Processing file: ${file.name}`);
-            const text = await parsePDF(file);
-            log(` + Processed file: ${file.name}. Found ${text.length.toLocaleString()} characters.`);
-            yield {
-                name: file.name+'.txt',
-                lastModified: new Date(),
-                input: text,
+            try {
+                status.textContent = (`Processing file [${ ++idx }/${ files.length }]: ${ file.name }`);
+                const text = await parsePDF(file);
+                yield {
+                    name: file.name + '.txt',
+                    lastModified: new Date(),
+                    input: text,
+                }
+            } catch (err) {
+                log(`Error processing file: ${ file.name }:`, err.message || err);
+                failures++;
             }
         }
     }
@@ -85,14 +95,19 @@
         downloadButton.disabled = files.length <= 0;
     });
     downloadButton.addEventListener('click', async () => {
-        // get the ZIP stream in a Blob
+        log('Beginning text extraction...');
+        failures = 0;
         const blob = await downloadZip(getFilesText()).blob();
 
+        log('Finished processing all files. Preparing download...');
         // make and click a temporary link to download the Blob
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         link.click();
-        link.remove();
+        link.innerText = "Download";
+        status.innerText = 'Finished: ';
+        status.append(link);
+        log(`Finished. ${failures ? failures.toLocaleString() + ' files failed.' : 'All files processed successfully.'}`);
     });
 
     log('Ready. Select PDF files to attempt text extraction.');
