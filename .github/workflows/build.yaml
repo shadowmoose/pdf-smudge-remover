@@ -1,0 +1,38 @@
+name: Build Site
+on:
+  push:
+    branches: [ main ]
+    paths-ignore: [ '**/**.md' ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    timeout-minutes: 1
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          cache: 'npm'
+          registry-url: https://registry.npmjs.org
+          node-version-file: ./package.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: 'Deploy TypeDoc: Versioned'
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          target-folder: ./
+          branch: gh-pages # The branch the action should deploy to.
+          folder: dist # The folder the action should deploy.
+          commit-message: Deploy site
+          git-config-name: build-bot
+          git-config-email: <>
