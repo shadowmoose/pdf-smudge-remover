@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Unredact</title>
+    <title>PDF Cleaner</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -27,7 +27,7 @@
     <b>Select PDF File(s):</b> <input type="file" name="files" id="fileInput" accept=".pdf" multiple />
     <br />
     <br />
-    <button type="button" onclick="download()" id="downloadButton" disabled>Download as Text</button>
+    <button type="button" id="downloadButton" disabled>Download as Text</button>
     <hr />
     <div
         id="output"
@@ -36,7 +36,7 @@
 </body>
 
 <script type="module">
-    import { downloadZip } from "https://cdn.jsdelivr.net/npm/client-zip@2.5.0/index.js"
+    import { downloadZip } from "https://cdn.jsdelivr.net/npm/client-zip@2.5.0/index.js";
     import { PDFParse } from 'https://cdn.jsdelivr.net/npm/pdf-parse@2.4.5/dist/pdf-parse/web/pdf-parse.es.js';
     const input = document.getElementById('fileInput');
     const output = document.getElementById('output');

@@ -32,5 +32,6 @@ jobs:
           commit-message: Deploy site
           git-config-name: build-bot
           git-config-email: <>
+
 permissions:
   contents: write
