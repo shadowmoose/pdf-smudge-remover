@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Unredact</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #25282f;
+            color: #fff;
+        }
+        h1 {
+            font-size: 24px;
+        }
+        hr {
+            margin: 20px 0;
+        }
+        #output p {
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>PDF to text mass-conversion tool</h1>
+    <b>Select PDF File(s):</b> <input type="file" name="files" id="fileInput" accept=".pdf" multiple />
+    <br />
+    <br />
+    <button type="button" onclick="download()" id="downloadButton" disabled>Download as Text</button>
+    <hr />
+    <div
+        id="output"
+        style="max-height: 400px; overflow-y: auto; white-space: pre; font-family: monospace"
+    ></div>
+</body>
+
+<script type="module">
+    import { downloadZip } from "./3f2a08ad7d8b5aeb7e8ff7888aa73770a34a98a1d94378e4c038013f1ac9a522.js"
+    import { PDFParse } from './1664c14da724b9b843f14afda4436bbebdf25aa61fd089838e48fb5f88f37f48.js';
+    const input = document.getElementById('fileInput');
+    const output = document.getElementById('output');
+    const downloadButton = document.getElementById('downloadButton');
+    let files = [];
+
+    PDFParse.setWorker('./18a831330911a5faf9e8863bc267d3baf66d6ce3e2af55552d35da38b516c257.mjs');
+
+    function log(...msg) {
+        const p = document.createElement('p');
+        p.textContent = msg.join(' ');
+        output.appendChild(p);
+        if (output.children.length > 200) {
+            output.children[0].remove();
+        }
+        p.scrollIntoView(false);
+    }
+
+    async function parsePDF(file) {
+        const arrayBuffer = await file.arrayBuffer();
+        const parser = new PDFParse({ data: arrayBuffer });
+        const result = await parser.getText();
+        await parser.destroy();
+        return result.text;
+    }
+
+    async function* getFilesText() {
+        let idx=0;
+        for (const file of files) {
+            log(`[${++idx}/${files.length}] Processing file: ${file.name}`);
+            const text = await parsePDF(file);
+            log(` + Processed file: ${file.name}. Found ${text.length.toLocaleString()} characters.`);
+            yield {
+                name: file.name+'.txt',
+                lastModified: new Date(),
+                input: text,
+            }
+        }
+    }
+
+    input.addEventListener('change', async (event) => {
+        files = event.target.files;
+        log("Files selected:", files.length.toLocaleString());
+        downloadButton.disabled = files.length <= 0;
+    });
+    downloadButton.addEventListener('click', async () => {
+        // get the ZIP stream in a Blob
+        const blob = await downloadZip(getFilesText()).blob();
+
+        // make and click a temporary link to download the Blob
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        link.remove();
+    });
+
+    log('Ready. Select PDF files to attempt text extraction.');
+</script>
+</html>
